@@ -1,0 +1,134 @@
+import random
+import math
+
+#Ask for the total number of players
+nPlayer = int(input("How many players do you want to start with? Enter an even number "))
+
+totalPlayers = []       #List contains all the players
+pc = []                 #A list that contains players choice (true/false)
+p = [0] * nPlayer       #the point list the record the amount of point earned by each player
+profile = []            #Profile combines the two lists (totalPlayers & pc) together into a nesting list
+
+#Putting Players into the totalPlayers list
+def fillPlayers() :
+    for i in range(1, nPlayer + 1) :
+        totalPlayers.append("Player" + str(i))
+
+fillPlayers()
+
+while nPlayer % 2 == 1:
+    print("Try again, with an even number")
+    nPlayer = int(input("How many players do you want to start with? Enter an even number "))
+
+#Total number of hawks  
+nH = int(input("How many hawks do you want to start with? "))
+
+while nH > nPlayer:
+    print("Try again, with a number that is smaller than the total population")
+    nH = int(input("How many hawks do you want to start with? "))
+
+##The remainings are the number of doves
+nD = nPlayer - nH
+
+print()
+print("The total number of player is", nPlayer)
+print()
+print("The total number of hawk is", nH)
+print()
+print("The total number of dove is", nD)
+
+#True or False = Corporate or Betray  (def different strategies)
+
+def Hawk() :
+    return False
+
+def Dove() :
+    return True
+
+#Putting choice in pc list
+def strategies():
+    for i in range(1, nH + 1):
+        pc.append(Hawk())
+    
+    for j in range (1, nD + 1):
+        pc.append(Dove())
+        
+strategies()     
+
+
+AverageP = [0] * nPlayer         #The mean payoff of individual player after n rounds
+HawkAverageP = [0] * nH          #The mean payoff of individual hawk after n rounds
+DoveAverageP = [0] * nD          #The mean payoff of individual dove after n rounds
+
+
+#Put the player list and the choice list into a larger list
+def combine():
+    for i in range (nPlayer):
+        profile.append(0)
+        profile[i] = totalPlayers[i], pc[i]
+
+#Simulate the outcome matrix, payoff can be adjusted
+def match(p1, p2) :
+    n1 = int(p1[0][6:]) - 1           #Find the corresponding index of the player, so for player1, the index would be 0
+    n2 = int(p2[0][6:]) - 1
+    if p1[1] == True and p2[1] == True:
+        p[n1] += 5                    #Find the corresponding point for the player
+        p[n2] += 5
+        return 5,5
+    elif p1[1] == True and p2[1] == False:
+        p[n1] += 0
+        p[n2] += 3
+        return 0, 3
+    elif p1[1] == False and p2[1] == True:
+        p[n1] += 3
+        p[n2] += 0
+        return 3, 0
+    else :
+        p[n1] += 1
+        p[n2] += 1
+        return 1, 1
+
+#Arrange players into matches (randomized)
+def round(n) :
+    print()
+    for i in range(n):
+        print("ROUND:", i + 1)
+        print()
+        combine()
+        while(len(profile) > 0):
+            p1 = profile[random.randint(0, len(profile) - 1)]       #Randomly chose a player and match it with another player
+            profile.remove(p1)
+            p2 = profile[random.randint(0, len(profile) - 1)]
+            profile.remove(p2)
+            print(p1[0], p2[0])    #Player
+            print(p1[1], p2[1])    #Their decision (true/false)
+            print(match(p1, p2))   #The output of the game
+            print()
+            
+        for l in range (nPlayer):
+            AverageP[l] = p[l]/(i+1)                 #Average out individual player's payoff within n rounds
+
+
+        for h in range (0, nH):
+            HawkAverageP[h] = AverageP[h]         #Categorize the mean payoffs of individual hawk 
+
+
+        for j in range (nH, len(p)):
+            DoveAverageP[j - nH] = AverageP[j]    #Categorize the mean payoffs of individual dove
+
+
+        print("The accumulated payoff for players are",p)        #The accumulated payoff of individual player after n rounds
+        print()
+        print("The average payoff for players after",i+1,"rounds are",AverageP)           
+        print()
+        print("The average payoff for hawks after",i+1,"rounds are",HawkAverageP)   
+        print()
+        print("The average payoff for doves after",i+1,"rounds are",DoveAverageP)   
+        print()
+        
+    for k in range (nPlayer):       #Empty p
+        p[k] = 0 
+
+        
+R = int(input("Enter a number "))
+round(R)
