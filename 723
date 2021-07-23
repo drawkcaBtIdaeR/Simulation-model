@@ -1,0 +1,57 @@
+k1 = 3              #Threshold of good standing
+k2 = 5              #Threshold of reproduction
+c1 = 2              #Reputation deduction
+c2 = 1              #Cost of helping
+
+function game(donor, recipient)
+    if donor[1] >= k2
+        if donor[2] >= k1
+            if recipient[2] >= k1
+                donor[2] += c1
+                donor[1] -= c2
+                recipient[1] += c2
+        if donor[2] < k1
+            donor[2] += c1
+            donor[1] -= c2
+            recipient[1] += c2
+    
+    if donor[1] < k2
+        donor[2] -= c2
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+nPlayer = 20
+
+Generation = 1
+
+P = zeros(nPlayer, 4)
+
+for i = 1:nPlayer
+    P[i,1] = i          
+    P[i,2] = 20         #Resource initialize 20
+    P[i,3] = 10         #Reputation initialize 10
+end
+
+
+for i = 1 : Generation
+    Duplicate = copy(P)
+    while length(Duplicate[:, 1]) > 0
+        pick1 = rand(1 : length(Duplicate[:, 1]))
+        #println(pick1)
+        #println(Duplicate[pick1, :])
+        println(P[Int(Duplicate[pick1, 1])])
+        Duplicate = Duplicate[1:end .!= pick1, :]  
+        #println(Duplicate)
+        pick2 = rand(1 : length(Duplicate[:, 1]))
+        #println(pick2)
+        #println(Duplicate[pick2, :])
+        println(P[Int(Duplicate[pick2, 1])])
+        Duplicate = Duplicate[1:end .!= pick2, :]
+        #println(Duplicate)
+    end
+end
