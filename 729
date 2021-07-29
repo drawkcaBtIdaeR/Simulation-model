@@ -1,0 +1,73 @@
+using Distributions
+
+nIndividual = 40
+
+Generation = 100
+
+k1 = 3              #Threshold of good standing
+k2 = 5              #Threshold of resource to trade, once below that no more *******************
+c1 = 2              #Reputation deduction
+c2 = 1              #Cost of helping
+
+MeanResource = 20
+MeanReputation = 10
+
+Parents = zeros(nIndividual, 3)                        #initialize and distribute
+
+for i = 1:nIndividual
+    Parents[i,1] = rand(Normal(MeanResource, 2))       #resource
+    Parents[i,2] = rand(Normal(MeanReputation, 2))     #reputation
+    Parents[i,3] = k2
+
+end
+
+function game(donor, recipient)
+    if donor[1] >= k2
+        if donor[2] >= k1
+            if recipient[2] >= k1
+                donor[2] += c1
+                donor[1] -= c2
+                recipient[1] += c2
+        if donor[2] < k1
+            donor[2] += c1
+            donor[1] -= c2
+            recipient[1] += c2
+    
+    if donor[1] < k2
+        donor[2] -= c2
+                    end
+                end
+            end
+        end
+    end
+end
+
+
+#game__________________________________________________________________________
+
+for i = 1 : Generation
+
+    indx = sample(axes(Parents, 1), nIndividual, replace = false)    #randomizer
+    Parents = Parents[indx, :]
+    Children = zeros(nIndividual, 3)
+    Children .= Parents               
+    
+    for i = 1 : Int(nIndividual / 2)               #play the game, and update the data back to parents
+        P1 = Children[2i - 1, :]
+        P2 = Children[2i, :]
+        game(P1, P2)
+        Children[2i - 1, :] = P1
+        Children[2i, :] = P2
+        Parents .= Children
+    
+    MeanResource = sum(Parents[:, 1]) / nIndividual         
+    MeanReputation = sum(Parents[:, 2]) / nIndividual
+    k1 = MeanReputation                                          #update the reputation threshold
+        
+    #next generation, distributing resources and reputation using normal distribution
+    for i = 1:nIndividual
+        Parents[i,1] = rand(Normal(MeanResource, 2))       #resource
+        Parents[i,2] = rand(Normal(MeanReputation, 2))     #reputation
+        
+    end
+end
