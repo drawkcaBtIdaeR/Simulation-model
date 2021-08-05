@@ -1,0 +1,103 @@
+using Distributions
+
+nIndividual = 40
+
+Generation = 10
+
+R = 10                   #Threshold of good standing
+c1 = 1                   #Cost of helping
+c2 = 2                   #Reputation deduction
+
+
+MeanResource = 200
+MeanReputation = 0
+MeanTrait = 0           
+MutationRate = 0.0001
+
+Parents = zeros(nIndividual, 3)                        #initialize and distribute
+
+for i = 1:nIndividual
+    Parents[i,1] = rand(Normal(MeanResource, 2))       #Resource
+    Parents[i,2] = 0                                   #Reputation point
+    Parents[i,3] = 100                                   #Threshold of resource to trade, once below that no more 
+end
+
+
+#_________________________
+function game(donor, recipient)
+    if donor[1] >= donor[3]
+        if donor[2] >= R
+            if recipient[2] >= R
+                donor[2] += c2
+                donor[1] -= c1
+                recipient[1] += c1
+            end
+        end
+        
+        if donor[2] < R
+            donor[2] += c2
+            donor[1] -= c1
+            recipient[1] += c1
+        end
+    end
+        
+    if donor[1] < donor[3]
+        donor[2] -= c2
+    end
+    
+end
+
+
+
+#_________________________
+
+for i = 1 : Generation
+    #simulation_____
+    indx = sample(axes(Parents, 1), nIndividual, replace = false)    #randomizer
+    Parents = Parents[indx, :]
+    Children = zeros(nIndividual, 3)
+    Children .= Parents               
+    
+    for i = 1 : Int(nIndividual / 2)               #play the game, and update the data back to parents
+        P1 = Children[2i - 1, :]
+        P2 = Children[2i, :]
+        game(P1, P2)
+        Children[2i - 1, :] = P1
+        Children[2i, :] = P2
+        Parents .= Children
+    end
+    
+    #analyze data____
+    MeanResource = sum(Parents[:, 1]) / nIndividual         
+    MeanReputation = sum(Parents[:, 2]) / nIndividual
+    R = MeanReputation                                  #update the reputation threshold****check later for the update method
+    # do the proportion * resource / total proportion * resource, to calculate the weight of each threshold
+    for i = 1 : nIndividual
+        MeanTrait += Parents[i,1] * Parents[i,3]  / sum(Parents[:, 1])
+        
+        #using the individual's resource / total resource, and times the trait itself, and then sum those up, getting the mean value for everyone next generation(the one with more resource has more influence)
+    end
+    MeanTrait = MeanTrait / nIndividual
+
+    #next generation____
+    for i = 1:nIndividual                                  #next generation, distributing resources and reputation using normal distribution
+        Parents[i,1] = rand(Normal(MeanResource, 2))       #resource
+        Parents[i,2] = rand(Normal(MeanReputation, 2))     #reputation****check
+        
+        if rand() < MutationRate
+            Parents[i,3] = MeanTrait + 3
+        else
+            Parents[i,3] = MeanTrait
+        end
+    
+    end
+    
+end
+
+
+#_______________________________________________________________________________________________
+
+
+#next step fix reputation
+
+Parents
